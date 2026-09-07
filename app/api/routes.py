@@ -1,5 +1,6 @@
 from app.schemas.document import DocumentCreate, DocumentUpdate
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from app.services.document_service import save_uploaded_file
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -90,6 +91,34 @@ def update_document(
     document.team = document_data.team
     document.storage_path = document_data.storage_path
 
+    db.commit()
+    db.refresh(document)
+
+    return document
+
+@router.post("/documents/upload", status_code=201)
+def upload_document(
+    team: str = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    allowed_types = {"pdf", "doc", "docx", "txt"}
+    file_type = file.filename.rsplit(".", 1)[-1].lower()
+    if file_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file type",
+        )
+    file_path = save_uploaded_file(file)
+
+    document = Document(
+        filename=file.filename,
+        file_type=file_type,
+        team=team,
+        storage_path=str(file_path),
+    )
+
+    db.add(document)
     db.commit()
     db.refresh(document)
 

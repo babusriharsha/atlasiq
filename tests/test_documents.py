@@ -23,6 +23,16 @@ def test_create_document():
     assert "id" in data
 
 def test_get_documents():
+    client.post(
+        "/documents",
+        json={
+            "filename": "list_test.pdf",
+            "file_type": "pdf",
+            "team": "engineering",
+            "storage_path": "/documents/list_test.pdf",
+        },
+    )
+
     response = client.get("/documents")
 
     assert response.status_code == 200
@@ -30,8 +40,8 @@ def test_get_documents():
     data = response.json()
 
     assert isinstance(data, list)
-    assert len(data) >= 1
-
+    assert len(data) == 1
+    assert data[0]["filename"] == "list_test.pdf"
 def test_get_document_by_id():
     create_response = client.post(
         "/documents",
@@ -117,4 +127,46 @@ def test_document_not_found():
     assert response.status_code == 404
     assert response.json() == {
         "detail": "Document not found"
+    }
+def test_upload_document():
+    response = client.post(
+        "/documents/upload",
+        data={
+            "team": "engineering",
+        },
+        files={
+            "file": (
+                "upload_test.txt",
+                b"AtlasIQ upload test content",
+                "text/plain",
+            ),
+        },
+    )
+
+    assert response.status_code == 201
+
+    data = response.json()
+
+    assert data["filename"] == "upload_test.txt"
+    assert data["file_type"] == "txt"
+    assert data["team"] == "engineering"
+    assert "id" in data
+def test_upload_rejects_unsupported_file():
+    response = client.post(
+        "/documents/upload",
+        data={
+            "team": "engineering",
+        },
+        files={
+            "file": (
+                "malware.exe",
+                b"fake executable content",
+                "application/octet-stream",
+            ),
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Unsupported file type"
     }

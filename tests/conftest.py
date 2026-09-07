@@ -1,10 +1,11 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import get_db
 from app.main import app
-from app.models.document import Base
+from app.models.document import Base, Document
 
 
 TEST_DATABASE_URL = (
@@ -35,3 +36,17 @@ app.dependency_overrides[get_db] = override_get_db
 Base.metadata.create_all(bind=test_engine)
 
 client = TestClient(app)
+@pytest.fixture(autouse=True)
+def clean_test_database():
+    db = TestingSessionLocal()
+
+    db.query(Document).delete()
+    db.commit()
+    db.close()
+
+    yield
+
+    db = TestingSessionLocal()
+    db.query(Document).delete()
+    db.commit()
+    db.close()
