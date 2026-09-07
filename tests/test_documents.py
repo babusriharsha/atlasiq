@@ -1,3 +1,5 @@
+from pathlib import Path
+from app.services.document_service import extract_text
 from tests.conftest import client
 
 
@@ -170,3 +172,37 @@ def test_upload_rejects_unsupported_file():
     assert response.json() == {
         "detail": "Unsupported file type"
     }
+def test_extract_text_from_txt(tmp_path):
+    file_path = tmp_path / "test.txt"
+    file_path.write_text(
+        "AtlasIQ extraction test",
+        encoding="utf-8",
+    )
+
+    text = extract_text(file_path)
+
+    assert text == "AtlasIQ extraction test"
+def test_extract_text_from_docx(tmp_path):
+    from docx import Document as DocxDocument
+
+    file_path = tmp_path / "test.docx"
+
+    document = DocxDocument()
+    document.add_paragraph("AtlasIQ DOCX extraction test")
+    document.save(file_path)
+
+    text = extract_text(file_path)
+
+    assert text == "AtlasIQ DOCX extraction test"
+def test_extract_text_from_pdf(tmp_path):
+    from reportlab.pdfgen import canvas
+
+    file_path = tmp_path / "test.pdf"
+
+    pdf = canvas.Canvas(str(file_path))
+    pdf.drawString(100, 750, "AtlasIQ PDF extraction test")
+    pdf.save()
+
+    text = extract_text(file_path)
+
+    assert "AtlasIQ PDF extraction test" in text
