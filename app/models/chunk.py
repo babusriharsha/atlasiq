@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column
+from pgvector.sqlalchemy import Vector
 
 from app.models.document import Base
 
@@ -25,4 +26,9 @@ class Chunk(Base):
     content: Mapped[str] = mapped_column(
         Text,
         nullable=False,
+    )
+
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(384),
+        nullable=True,
     )

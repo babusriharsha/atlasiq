@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.chunk import Chunk
+from app.services.embedding_service import generate_embedding
 
 def chunk_text(
     text: str,
@@ -38,6 +39,7 @@ def save_chunks(
             document_id=document_id,
             chunk_index=index,
             content=content,
+            embedding=generate_embedding(content),
         )
 
         db.add(chunk)
