@@ -1,6 +1,8 @@
+from pathlib import Path
+from app.services.chunking_service import chunk_text, save_chunks
+from app.services.document_service import extract_text, save_uploaded_file
 from app.schemas.document import DocumentCreate, DocumentUpdate
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from app.services.document_service import save_uploaded_file
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -122,4 +124,13 @@ def upload_document(
     db.commit()
     db.refresh(document)
 
+    text = extract_text(Path(file_path))
+    chunks = chunk_text(text)
+    save_chunks(
+    db=db,
+    document_id=document.id,
+    chunks=chunks,
+)
+    db.refresh(document)
+ 
     return document

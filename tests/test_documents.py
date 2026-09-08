@@ -1,3 +1,5 @@
+from app.models.chunk import Chunk
+from tests.conftest import TestingSessionLocal
 from pathlib import Path
 from app.services.document_service import extract_text
 from tests.conftest import client
@@ -206,3 +208,38 @@ def test_extract_text_from_pdf(tmp_path):
     text = extract_text(file_path)
 
     assert "AtlasIQ PDF extraction test" in text
+def test_upload_creates_chunks():
+    content = ("AtlasIQ engineering knowledge base. " * 120).encode()
+
+    response = client.post(
+        "/documents/upload",
+        data={
+            "team": "engineering",
+        },
+        files={
+            "file": (
+                "ingestion_test.txt",
+                content,
+                "text/plain",
+            ),
+        },
+    )
+
+    assert response.status_code == 201
+
+    document_id = response.json()["id"]
+
+    db = TestingSessionLocal()
+
+    try:
+        chunks = (
+            db.query(Chunk)
+            .filter(Chunk.document_id == document_id)
+            .all()
+        )
+
+        assert len(chunks) > 1
+        assert chunks[0].chunk_index == 0
+        assert chunks[0].content
+    finally:
+        db.close()
