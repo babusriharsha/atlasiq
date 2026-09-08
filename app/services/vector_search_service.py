@@ -10,12 +10,13 @@ def search_similar_chunks(
     query: str,
     team: str,
     limit: int = 5,
+    min_similarity: float = 0.20,
 ):
     query_embedding = generate_embedding(query)
 
     distance = Chunk.embedding.cosine_distance(query_embedding)
 
-    return (
+    results = (
         db.query(
             Chunk,
             distance.label("distance"),
@@ -29,3 +30,9 @@ def search_similar_chunks(
         .limit(limit)
         .all()
     )
+
+    return [
+        (chunk, result_distance)
+        for chunk, result_distance in results
+        if 1 - float(result_distance) >= min_similarity
+    ]
