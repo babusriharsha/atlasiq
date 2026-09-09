@@ -1,3 +1,5 @@
+from app.models.feedback import Feedback
+from app.schemas.feedback import FeedbackCreate
 from app.schemas.ask import AskRequest
 from app.services.rag_service import answer_question
 from pathlib import Path
@@ -7,7 +9,6 @@ from app.schemas.document import DocumentCreate, DocumentUpdate
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-
 from app.core.database import get_db
 from app.models.document import Document
 
@@ -147,3 +148,21 @@ def ask_question(
         question=request.question,
         team=request.team,
     )
+@router.post("/feedback", status_code=201)
+def create_feedback(
+    feedback_data: FeedbackCreate,
+    db: Session = Depends(get_db),
+):
+    feedback = Feedback(
+        question=feedback_data.question,
+        answer=feedback_data.answer,
+        team=feedback_data.team,
+        rating=feedback_data.rating,
+        correction=feedback_data.correction,
+    )
+
+    db.add(feedback)
+    db.commit()
+    db.refresh(feedback)
+
+    return feedback
