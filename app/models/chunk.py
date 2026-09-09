@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey, Integer, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 
 from app.models.document import Base
@@ -31,4 +31,7 @@ class Chunk(Base):
     embedding: Mapped[list[float] | None] = mapped_column(
         Vector(384),
         nullable=True,
+    )
+    document = relationship(
+        "Document",
     )

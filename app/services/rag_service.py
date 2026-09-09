@@ -36,6 +36,7 @@ def answer_question(
         sources.append(
             {
                 "document_id": chunk.document_id,
+                "filename": chunk.document.filename, 
                 "chunk_index": chunk.chunk_index,
             }
         )
