@@ -6,7 +6,7 @@ from app.models.feedback import Feedback
 from app.core.database import get_db
 from app.main import app
 from app.models.document import Base, Document
-
+from app.models.query_log import QueryLog
 
 TEST_DATABASE_URL = (
     "postgresql+psycopg://atlasiq_user:"
@@ -40,6 +40,7 @@ client = TestClient(app)
 def clean_test_database():
     db = TestingSessionLocal()
 
+    db.query(QueryLog).delete()
     db.query(Feedback).delete()
     db.query(Document).delete()
     
@@ -49,6 +50,8 @@ def clean_test_database():
     yield
 
     db = TestingSessionLocal()
+
+    db.query(QueryLog).delete()
     db.query(Feedback).delete()
     db.query(Document).delete()
     db.commit()

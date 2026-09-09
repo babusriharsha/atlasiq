@@ -1,5 +1,7 @@
+from time import perf_counter
+from app.services.query_log_service import save_query_log
+from app.services.llm_service import MODEL_NAME
 from sqlalchemy.orm import Session
-
 from app.services.hybrid_search_service import hybrid_search
 from app.services.llm_service import generate_answer
 
@@ -12,6 +14,7 @@ def answer_question(
     question: str,
     team: str,
 ) -> dict:
+    start_time = perf_counter()
     results = hybrid_search(
         db=db,
         query=question,
@@ -63,7 +66,16 @@ ANSWER:
 """
 
     answer = generate_answer(prompt).strip()
+    latency_seconds = perf_counter() - start_time
 
+    save_query_log(
+        db=db,
+        question=question,
+        team=team,
+        model_name=MODEL_NAME,
+        latency_seconds=latency_seconds,
+        estimated_cost_usd=0.0,
+)
     if answer == NO_DOCUMENTATION_MESSAGE:
         return {
             "answer": answer,
