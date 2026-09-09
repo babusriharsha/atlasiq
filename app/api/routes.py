@@ -1,4 +1,7 @@
-from app.services.metrics_service import get_feedback_metrics
+from app.services.metrics_service import (
+    get_feedback_metrics,
+    get_query_metrics,
+)
 from app.models.feedback import Feedback
 from app.schemas.feedback import FeedbackCreate
 from app.schemas.ask import AskRequest
@@ -173,6 +176,15 @@ def feedback_metrics(
     db: Session = Depends(get_db),
 ):
     return get_feedback_metrics(
+        db=db,
+        team=team,
+    )
+@router.get("/metrics/queries")
+def query_metrics(
+    team: str | None = None,
+    db: Session = Depends(get_db),
+):
+    return get_query_metrics(
         db=db,
         team=team,
     )
