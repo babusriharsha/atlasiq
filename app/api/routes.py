@@ -1,3 +1,4 @@
+from app.services.metrics_service import get_feedback_metrics
 from app.models.feedback import Feedback
 from app.schemas.feedback import FeedbackCreate
 from app.schemas.ask import AskRequest
@@ -166,3 +167,12 @@ def create_feedback(
     db.refresh(feedback)
 
     return feedback
+@router.get("/metrics/feedback")
+def feedback_metrics(
+    team: str | None = None,
+    db: Session = Depends(get_db),
+):
+    return get_feedback_metrics(
+        db=db,
+        team=team,
+    )

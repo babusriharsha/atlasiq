@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from app.models.feedback import Feedback
 from app.core.database import get_db
 from app.main import app
 from app.models.document import Base, Document
@@ -40,13 +40,16 @@ client = TestClient(app)
 def clean_test_database():
     db = TestingSessionLocal()
 
+    db.query(Feedback).delete()
     db.query(Document).delete()
+    
     db.commit()
     db.close()
 
     yield
 
     db = TestingSessionLocal()
+    db.query(Feedback).delete()
     db.query(Document).delete()
     db.commit()
     db.close()
