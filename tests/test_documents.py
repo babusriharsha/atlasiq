@@ -298,3 +298,22 @@ def test_duplicate_filenames_get_unique_storage_paths():
         first_data["storage_path"]
         != second_data["storage_path"]
     )
+def test_upload_rejects_file_larger_than_10mb():
+    large_content = b"a" * (10 * 1024 * 1024 + 1)
+
+    response = client.post(
+        "/documents/upload",
+        data={"team": "engineering"},
+        files={
+            "file": (
+                "large.txt",
+                large_content,
+                "text/plain",
+            )
+        },
+    )
+
+    assert response.status_code == 413
+    assert response.json()["detail"] == (
+        "File too large. Maximum size is 10 MB."
+    )

@@ -118,6 +118,16 @@ def upload_document(
             status_code=400,
             detail="Unsupported file type",
         )
+    MAX_FILE_SIZE = 10 * 1024 * 1024
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(
+           status_code=413,
+            detail="File too large. Maximum size is 10 MB.",
+        )
     file_path = save_uploaded_file(file)
 
     document = Document(
