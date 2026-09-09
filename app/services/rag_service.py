@@ -21,13 +21,23 @@ def answer_question(
         team=team,
         limit=5,
     )
-
     if not results:
+        latency_seconds = perf_counter() - start_time
+
+        save_query_log(
+            db=db,
+            question=question,
+            team=team,
+            model_name=MODEL_NAME,
+            latency_seconds=latency_seconds,
+            estimated_cost_usd=0.0,
+        )
+
         return {
             "answer": NO_DOCUMENTATION_MESSAGE,
             "sources": [],
         }
-
+    
     context_parts = []
     sources = []
 

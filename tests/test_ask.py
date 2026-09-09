@@ -99,3 +99,35 @@ def test_ask_creates_query_log(monkeypatch):
 
     finally:
         db.close()
+def test_ask_no_documentation_creates_query_log():
+    response = client.post(
+        "/ask",
+        json={
+            "question": "What is the company vacation policy?",
+            "team": "engineering",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["answer"] == (
+        "No documentation is available for this question."
+    )
+    assert data["sources"] == []
+
+    db = TestingSessionLocal()
+
+    try:
+        query_log = db.query(QueryLog).first()
+
+        assert query_log is not None
+        assert query_log.question == (
+            "What is the company vacation policy?"
+        )
+        assert query_log.team == "engineering"
+        assert query_log.estimated_cost_usd == 0.0
+
+    finally:
+        db.close()
