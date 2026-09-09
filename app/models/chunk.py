@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer, Text
+from sqlalchemy import ForeignKey, Index, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 
@@ -7,7 +7,16 @@ from app.models.document import Base
 
 class Chunk(Base):
     __tablename__ = "chunks"
-
+    __table_args__ = (
+        Index(
+            "chunks_embedding_hnsw_idx",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={
+                "embedding": "vector_cosine_ops",
+            },
+        ),
+    )
     id: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
