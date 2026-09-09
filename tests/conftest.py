@@ -8,11 +8,12 @@ from app.main import app
 from app.models.document import Base, Document
 from app.models.query_log import QueryLog
 
-TEST_DATABASE_URL = (
-    "postgresql+psycopg://atlasiq_user:"
-    "REMOVED_OLD_PASSWORD@localhost/atlasiq_test"
-)
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")	
 test_engine = create_engine(TEST_DATABASE_URL)
 
 TestingSessionLocal = sessionmaker(
