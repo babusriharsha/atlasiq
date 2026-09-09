@@ -1,3 +1,5 @@
+from app.schemas.ask import AskRequest
+from app.services.rag_service import answer_question
 from pathlib import Path
 from app.services.chunking_service import chunk_text, save_chunks
 from app.services.document_service import extract_text, save_uploaded_file
@@ -134,3 +136,14 @@ def upload_document(
     db.refresh(document)
  
     return document
+
+@router.post("/ask")
+def ask_question(
+    request: AskRequest,
+    db: Session = Depends(get_db),
+):
+    return answer_question(
+        db=db,
+        question=request.question,
+        team=request.team,
+    )
