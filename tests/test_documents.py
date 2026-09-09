@@ -367,3 +367,18 @@ def test_failed_ingestion_cleans_up_file_and_document(monkeypatch):
     )
 
     assert leftover_files == []
+def test_upload_rejects_filename_without_extension():
+    response = client.post(
+        "/documents/upload",
+        data={"team": "engineering"},
+        files={
+            "file": (
+                "invalidfilename",
+                b"content",
+                "text/plain",
+            )
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid filename"

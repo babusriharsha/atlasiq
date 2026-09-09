@@ -111,6 +111,12 @@ def upload_document(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
+    if not file.filename or "." not in file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid filename",
+        )
+
     allowed_types = {"pdf", "docx", "txt"}
     file_type = file.filename.rsplit(".", 1)[-1].lower()
     if file_type not in allowed_types:
