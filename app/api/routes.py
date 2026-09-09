@@ -111,7 +111,7 @@ def upload_document(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    allowed_types = {"pdf", "doc", "docx", "txt"}
+    allowed_types = {"pdf", "docx", "txt"}
     file_type = file.filename.rsplit(".", 1)[-1].lower()
     if file_type not in allowed_types:
         raise HTTPException(

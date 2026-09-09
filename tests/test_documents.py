@@ -243,3 +243,20 @@ def test_upload_creates_chunks():
         assert chunks[0].content
     finally:
         db.close()
+def test_upload_rejects_legacy_doc_file():
+    response = client.post(
+        "/documents/upload",
+        data={
+            "team": "engineering",
+        },
+        files={
+            "file": (
+                "legacy_document.doc",
+                b"fake legacy doc content",
+                "application/msword",
+            ),
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Unsupported file type"
