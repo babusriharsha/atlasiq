@@ -260,3 +260,41 @@ def test_upload_rejects_legacy_doc_file():
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Unsupported file type"
+def test_duplicate_filenames_get_unique_storage_paths():
+    first = client.post(
+        "/documents/upload",
+        data={"team": "engineering"},
+        files={
+            "file": (
+                "policy.txt",
+                b"First policy document.",
+                "text/plain",
+            )
+        },
+    )
+
+    second = client.post(
+        "/documents/upload",
+        data={"team": "engineering"},
+        files={
+            "file": (
+                "policy.txt",
+                b"Second policy document.",
+                "text/plain",
+            )
+        },
+    )
+
+    assert first.status_code == 201
+    assert second.status_code == 201
+
+    first_data = first.json()
+    second_data = second.json()
+
+    assert first_data["filename"] == "policy.txt"
+    assert second_data["filename"] == "policy.txt"
+
+    assert (
+        first_data["storage_path"]
+        != second_data["storage_path"]
+    )

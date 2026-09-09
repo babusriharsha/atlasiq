@@ -1,3 +1,4 @@
+from uuid import uuid4
 from docx import Document as DocxDocument
 from pypdf import PdfReader
 from pathlib import Path
@@ -13,7 +14,8 @@ def save_uploaded_file(file: UploadFile) -> Path:
     UPLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
     safe_filename = Path(file.filename).name
-    file_path = UPLOAD_DIRECTORY / safe_filename
+    unique_filename = f"{uuid4().hex}_{safe_filename}"
+    file_path = UPLOAD_DIRECTORY / unique_filename
 
     with file_path.open("wb") as destination:
         shutil.copyfileobj(file.file, destination)
