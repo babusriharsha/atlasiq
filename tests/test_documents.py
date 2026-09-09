@@ -1,6 +1,8 @@
+import pytest
+from pathlib import Path
 from app.models.chunk import Chunk
 from tests.conftest import TestingSessionLocal
-from pathlib import Path
+from app.models.document import Document
 from app.services.document_service import extract_text
 from tests.conftest import client
 
@@ -125,6 +127,7 @@ def test_delete_document():
     get_response = client.get(f"/documents/{document_id}")
 
     assert get_response.status_code == 404
+
 def test_document_not_found():
     response = client.get("/documents/999999")
 
@@ -132,6 +135,7 @@ def test_document_not_found():
     assert response.json() == {
         "detail": "Document not found"
     }
+
 def test_upload_document():
     response = client.post(
         "/documents/upload",
@@ -155,6 +159,7 @@ def test_upload_document():
     assert data["file_type"] == "txt"
     assert data["team"] == "engineering"
     assert "id" in data
+
 def test_upload_rejects_unsupported_file():
     response = client.post(
         "/documents/upload",
@@ -174,6 +179,7 @@ def test_upload_rejects_unsupported_file():
     assert response.json() == {
         "detail": "Unsupported file type"
     }
+
 def test_extract_text_from_txt(tmp_path):
     file_path = tmp_path / "test.txt"
     file_path.write_text(
@@ -184,6 +190,7 @@ def test_extract_text_from_txt(tmp_path):
     text = extract_text(file_path)
 
     assert text == "AtlasIQ extraction test"
+
 def test_extract_text_from_docx(tmp_path):
     from docx import Document as DocxDocument
 
@@ -196,6 +203,7 @@ def test_extract_text_from_docx(tmp_path):
     text = extract_text(file_path)
 
     assert text == "AtlasIQ DOCX extraction test"
+
 def test_extract_text_from_pdf(tmp_path):
     from reportlab.pdfgen import canvas
 
@@ -208,6 +216,7 @@ def test_extract_text_from_pdf(tmp_path):
     text = extract_text(file_path)
 
     assert "AtlasIQ PDF extraction test" in text
+
 def test_upload_creates_chunks():
     content = ("AtlasIQ engineering knowledge base. " * 120).encode()
 
@@ -317,3 +326,44 @@ def test_upload_rejects_file_larger_than_10mb():
     assert response.json()["detail"] == (
         "File too large. Maximum size is 10 MB."
     )
+
+def test_failed_ingestion_cleans_up_file_and_document(monkeypatch):
+    def fail_extraction(_):
+        raise RuntimeError("Simulated extraction failure")
+
+    monkeypatch.setattr(
+        "app.api.routes.extract_text",
+        fail_extraction,
+    )
+
+    with pytest.raises(RuntimeError, match="Simulated extraction failure"):
+        client.post(
+            "/documents/upload",
+            data={"team": "engineering"},
+            files={
+                "file": (
+                    "broken.txt",
+                    b"This upload should fail.",
+                    "text/plain",
+                )
+            },
+        )
+
+    db = TestingSessionLocal()
+
+    try:
+        document = (
+            db.query(Document)
+            .filter(Document.filename == "broken.txt")
+            .first()
+        )
+
+        assert document is None
+    finally:
+        db.close()
+
+    leftover_files = list(
+        Path("storage/documents").glob("*_broken.txt")
+    )
+
+    assert leftover_files == []

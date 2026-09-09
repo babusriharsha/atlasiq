@@ -137,20 +137,36 @@ def upload_document(
         storage_path=str(file_path),
     )
 
-    db.add(document)
-    db.commit()
-    db.refresh(document)
+    try:
+        db.add(document)
+        db.commit()
+        db.refresh(document)
 
-    text = extract_text(Path(file_path))
-    chunks = chunk_text(text)
-    save_chunks(
-    db=db,
-    document_id=document.id,
-    chunks=chunks,
-)
-    db.refresh(document)
- 
-    return document
+        text = extract_text(Path(file_path))
+        chunks = chunk_text(text)
+
+        save_chunks(
+            db=db,
+            document_id=document.id,
+            chunks=chunks,
+        )
+
+        db.refresh(document)
+        return document
+
+    except Exception:
+        db.rollback()
+
+        if document.id is not None:
+            existing_document = db.get(Document, document.id)
+            if existing_document is not None:
+                db.delete(existing_document)
+                db.commit()
+
+        if file_path.exists():
+            file_path.unlink()
+
+        raise
 
 @router.post("/ask")
 def ask_question(
