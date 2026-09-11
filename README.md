@@ -23,6 +23,40 @@ AtlasIQ addresses this by:
 ## Architecture
 ![AtlasIQ Architecture](docs/images/atlasiq-architecture.png)
 
+## Demo
+
+AtlasIQ answers questions using retrieved company documentation and returns the source used to generate the answer.
+
+### Example question
+
+```bash
+curl -X POST http://localhost:8002/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is AtlasIQ?",
+    "team": "engineering"
+  }'
+```
+
+### Grounded response
+
+```json
+{
+  "answer": "AtlasIQ is an enterprise AI knowledge assistant for engineering teams.",
+  "sources": [
+    {
+      "document_id": 1,
+      "filename": "docker-test.txt",
+      "chunk_index": 0
+    }
+  ]
+}
+```
+
+This demonstrates the core RAG flow:
+
+**Question + Team → Hybrid Retrieval → Retrieved Context → Local LLM → Grounded Answer + Citation**
+
 ## Core Capabilities
 
 ### Document ingestion
