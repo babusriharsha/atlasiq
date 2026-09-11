@@ -23,58 +23,6 @@ AtlasIQ addresses this by:
 ## Architecture
 ![AtlasIQ Architecture](docs/images/atlasiq-architecture.png)
 
-```text
-                        ┌─────────────────────┐
-                        │       Client        │
-                        └──────────┬──────────┘
-                                   │
-                                   ▼
-                        ┌─────────────────────┐
-                        │       FastAPI       │
-                        │      REST API       │
-                        └──────────┬──────────┘
-                                   │
-              ┌────────────────────┴────────────────────┐
-              │                                         │
-              ▼                                         ▼
-    ┌─────────────────────┐                   ┌─────────────────────┐
-    │ Document Ingestion  │                   │    Question/RAG     │
-    │                     │                   │      Pipeline       │
-    └──────────┬──────────┘                   └──────────┬──────────┘
-               │                                         │
-               ▼                                         ▼
-    ┌─────────────────────┐                   ┌─────────────────────┐
-    │ Extract + Chunk     │                   │  Hybrid Retrieval   │
-    │ Document Text       │                   │ Vector + Keyword    │
-    └──────────┬──────────┘                   └──────────┬──────────┘
-               │                                         │
-               ▼                                         │
-    ┌─────────────────────┐                              │
-    │ SentenceTransformer │                              │
-    │ Embeddings          │                              │
-    └──────────┬──────────┘                              │
-               │                                         │
-               └──────────────────┬──────────────────────┘
-                                  ▼
-                     ┌─────────────────────────┐
-                     │ PostgreSQL + pgvector   │
-                     │ Documents / Chunks /    │
-                     │ Embeddings / Metrics    │
-                     └────────────┬────────────┘
-                                  │
-                                  ▼
-                     ┌─────────────────────────┐
-                     │ Ollama + Llama 3.2 3B   │
-                     │ Grounded Generation     │
-                     └────────────┬────────────┘
-                                  │
-                                  ▼
-                     ┌─────────────────────────┐
-                     │ Answer + Source         │
-                     │ Citations               │
-                     └─────────────────────────┘
-```
-
 ## Core Capabilities
 
 ### Document ingestion
