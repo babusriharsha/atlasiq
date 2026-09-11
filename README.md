@@ -1,6 +1,7 @@
 # AtlasIQ
 [![AtlasIQ CI](https://github.com/babusriharsha/atlasiq/actions/workflows/ci.yml/badge.svg)](https://github.com/babusriharsha/atlasiq/actions/workflows/ci.yml)
-**Enterprise AI Knowledge Assistant with Grounded RAG, Hybrid Retrieval, Team-Level Access Control, and Local LLM Inference**
+
+**Enterprise AI Knowledge Assistant with Grounded RAG, Hybrid Retrieval, Team-Scoped Search, and Local LLM Inference**
 
 AtlasIQ is a production-oriented Retrieval-Augmented Generation (RAG) application that enables engineering and customer-support teams to ask questions against internal company documentation and receive grounded answers with source citations.
 
@@ -372,7 +373,6 @@ Other production extensions could include:
 * object storage
 * managed PostgreSQL
 * background ingestion workers
-* CI/CD
 * cloud deployment
 * enterprise identity integration
 
