@@ -21,6 +21,7 @@ AtlasIQ addresses this by:
 * supporting reproducible containerized deployment
 
 ## Architecture
+![AtlasIQ Architecture](docs/images/atlasiq-architecture.png)
 
 ```text
                         ┌─────────────────────┐
