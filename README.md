@@ -57,6 +57,17 @@ This demonstrates the core RAG flow:
 
 **Question + Team → Hybrid Retrieval → Retrieved Context → Local LLM → Grounded Answer + Citation**
 
+## Portfolio Highlights
+
+- Built an end-to-end enterprise RAG system from document ingestion through grounded answer generation.
+- Implemented hybrid retrieval using semantic vector search, keyword search, and Reciprocal Rank Fusion (RRF).
+- Added team-scoped document retrieval to isolate search results by team.
+- Used PostgreSQL + pgvector with 384-dimensional embeddings and an HNSW vector index.
+- Integrated a local Ollama LLM for private, low-cost inference.
+- Added source citations, feedback capture, query logging, evaluation metrics, and automated testing.
+- Containerized the full stack with Docker Compose and reproducible database migrations.
+- Added GitHub Actions CI with 41 automated tests and approximately 98% application coverage.
+
 ## Core Capabilities
 
 ### Document ingestion
